@@ -1,6 +1,7 @@
-import {FC, useCallback, useEffect, useState} from "react";
+import {FC, useCallback, useEffect, useMemo, useState} from "react";
 import type {VarhubGameClient} from "../../types";
 import type {GameState} from "../../controllers";
+import {QrCodeCanvas} from "../QrCodeCanvas";
 
 interface RoomProps {
 	client: VarhubGameClient;
@@ -25,6 +26,17 @@ export const Room: FC<RoomProps> = (props) => {
 		return () => client.messages.off("state", setGameState);
 	}, [client]);
 
+	const inviteUrl = useMemo<string|null>(() => {
+		const resultUrl = new URL(location.href);
+		resultUrl.searchParams.set("url", client.hub.url);
+		resultUrl.searchParams.set("room", client.roomId);
+		return resultUrl.href;
+	}, [client]);
+
+	const share = useCallback(() => {
+		void navigator.share({url: inviteUrl, title: "Join game", text: `Room id: ${client.roomId}`});
+	}, [inviteUrl, client])
+
 	if (!gameState) return <div>No game state</div>;
 
 	return (
@@ -45,6 +57,12 @@ export const Room: FC<RoomProps> = (props) => {
 
 			<div style={{marginTop: "40px"}}>
 				<button onClick={leave}>Quit</button>
+			</div>
+
+
+			<QrCodeCanvas data={inviteUrl} onClick={share} />
+			<div>
+				{client.roomId}
 			</div>
 		</div>
 	)
