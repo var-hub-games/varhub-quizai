@@ -15,6 +15,7 @@ export type GameState = {
 	answeredPlayers: Array<string>;
 	correctAnswerIndex: number|null;
 	phase: GamePhase;
+	currentSubject?: string;
 }
 
 export type GamePhase =
@@ -50,14 +51,14 @@ export function updateState() {
 }
 
 const chatGptUrl = config["chatGptUrl"] as string;
-async function requestChatGPTQuiz(theme: string = "ягоды") {
+async function requestChatGPTQuiz(subject: string = "случайная тема") {
 
 	const request = {
 		"modelName": "gpt-4",
 		"nsfwBlock": false,
 		"context": [
 			{"role": "system", "message": "Ты помощник, который получает сообщение - тему, и формирует викторину на эту тему. Ответ нужно выдать в JSON в следующем формате: \"{question, answers, correctAnswerIndex}\""},
-			{"role": "user", "message": theme}
+			{"role": "user", "message": subject}
 		]
 	}
 
@@ -71,7 +72,7 @@ async function requestChatGPTQuiz(theme: string = "ягоды") {
 	return JSON.parse(response.body.result[0].result.replace(/(```|\n)/g,"").replace("json{","{"));
 }
 
-export async function requestNewQuestion (theme?: string) {
+export async function requestNewQuestion (subject?: string) {
 	if (state.phase !== "idle" && state.phase !== "results") return;
 
 	currentAnswers = {};
@@ -79,8 +80,9 @@ export async function requestNewQuestion (theme?: string) {
 	state.correctAnswerIndex = null;
 	state.currentQuiz = null;
 	state.phase = "pending";
+	state.currentSubject = subject
 	updateState();
-	const question = await requestChatGPTQuiz(theme);
+	const question = await requestChatGPTQuiz(subject);
 
 	correctAnswerIndex = question.correctAnswerIndex;
 	delete question["correctAnswerIndex"];

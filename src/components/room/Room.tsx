@@ -50,7 +50,7 @@ export const Room: FC<RoomProps> = (props) => {
 
 			<Card>
 				<CardHeader className="flex-col items-start">
-					<p>Вопрос на тему: ягода</p>
+					<p>Вопрос{gameState.currentSubject && ` на тему: ${gameState.currentSubject.toLowerCase()}`}</p>
 					<small className="text-default-500">Текущее состояние: {gamePhaseNames[gameState.phase]}</small>
 				</CardHeader>
 				<Divider/>

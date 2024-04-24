@@ -26,7 +26,7 @@ export const QuizGenerateBlock: FC<QuizGenerateBlockProps> = ({state, client}) =
 				<p>Новый вопрос</p>
 				<Input value={theme} onChange={(e) => setTheme(e.target.value)} placeholder="Ягоды / игры / знаменитости / ..."/>
 				<Button
-					onClick={() => client.methods.requestNewQuestion()}
+					onClick={onClickGenerate}
 					color="secondary"
 					className="mt-2"
 				>
