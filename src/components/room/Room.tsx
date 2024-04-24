@@ -2,6 +2,12 @@ import {FC, useCallback, useEffect, useMemo, useState} from "react";
 import type {VarhubGameClient} from "../../types";
 import type {GameState} from "../../controllers";
 import {QrCodeCanvas} from "../QrCodeCanvas";
+import {Card, CardBody, CardHeader} from "@nextui-org/card";
+import {Accordion, AccordionItem, Divider} from "@nextui-org/react";
+import {QuizCardBody} from "./QuizCardBody";
+import {QuizAnswerSection} from "./QuizAnswerSection";
+import {Button} from "@nextui-org/button";
+import {QuizGenerateBlock} from "./QuizGenerateBlock";
 
 interface RoomProps {
 	client: VarhubGameClient;
@@ -40,30 +46,54 @@ export const Room: FC<RoomProps> = (props) => {
 	if (!gameState) return <div>No game state</div>;
 
 	return (
-		<div>
-			{JSON.stringify(gameState)}
-			<button onClick={() => client.methods.requestNewQuestion()}>Request new question</button>
+		<div className="flex flex-col">
 
-			{gameState.phase === "question" && (
-				<div>
-					Answers:
-					{gameState.currentQuiz?.answers?.map((answer, i) => (
-						<div key={i}>
-							<button onClick={() => client.methods.answer(i)}>{answer}</button>
-						</div>
+			<Card>
+				<CardHeader className="flex-col items-start">
+					<p>Вопрос на тему: ягода</p>
+					<small className="text-default-500">Текущее состояние: {gamePhaseNames[gameState.phase]}</small>
+				</CardHeader>
+				<Divider/>
+				<QuizCardBody state={gameState}/>
+				<QuizAnswerSection state={gameState} client={client}/>
+				<QuizGenerateBlock state={gameState} client={client}/>
+			</Card>
+
+			<Card className="mt-8">
+				<CardBody>
+					<b>Таблица очков:</b>
+					{Object.entries(gameState.scoreMap).map(([player, score]) => (
+						<p>
+							{player}: {score}
+						</p>
 					))}
-				</div>
-			)}
+				</CardBody>
+			</Card>
 
-			<div style={{marginTop: "40px"}}>
-				<button onClick={leave}>Quit</button>
+			<div className="flex flex-col items-center mt-4">
+				<QrCodeCanvas data={inviteUrl} onClick={share} />
+				<p>Room: {client.roomId}</p>
 			</div>
 
 
-			<QrCodeCanvas data={inviteUrl} onClick={share} />
-			<div>
-				{client.roomId}
-			</div>
+			<Button className="mt-4" color="danger" onClick={leave}>Quit</Button>
+
+
+			<Card className="mt-8">
+				<Accordion>
+					<AccordionItem key="1" aria-label="JSON State" title="JSON State">
+						{JSON.stringify(gameState)}
+					</AccordionItem>
+				</Accordion>
+			</Card>
 		</div>
 	)
+}
+
+const gamePhaseNames: Record<GameState["phase"], string> = {
+	question: "Ожидание ответов от игроков",
+	idle: "Начало",
+	pending: "Генерация вопроса",
+	results: "Результаты",
+	finish: "Конец игры"
 }

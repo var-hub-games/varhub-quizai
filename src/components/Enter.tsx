@@ -10,7 +10,7 @@ export const Enter: FC<{onCreate: (data: VarhubGameClient) => void}> = (props) =
 	const [initValues] = useState(() => {
 		const searchParams = new URLSearchParams(location.search);
 
-		const url = searchParams.get("url") ?? history?.state?.url ?? "";
+		const url = searchParams.get("url") ?? history?.state?.url ?? "https://varhub.dpohvar.ru/";
 		const room = searchParams.get("room") ?? history?.state?.room ?? "";
 		const name = history?.state?.name ?? "";
 		const join = history?.state?.join ?? false;
@@ -59,7 +59,7 @@ export const Enter: FC<{onCreate: (data: VarhubGameClient) => void}> = (props) =
 		const url = (inputs.namedItem("url") as HTMLInputElement).value;
 		const room = action === "join" ? (inputs.namedItem("room") as HTMLInputElement).value : "";
 		const name = (inputs.namedItem("name") as HTMLInputElement).value;
-		const chatGptUrl = (inputs.namedItem("chatGptUrl") as HTMLInputElement).value;
+		const chatGptUrl = (inputs.namedItem("chatGptUrl") as HTMLInputElement).value || "";
 		void enterRoom(url, room, name, chatGptUrl);
 	}, []);
 

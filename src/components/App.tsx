@@ -1,4 +1,6 @@
 import React, { FC, useEffect, useState } from "react";
+import {NextUIProvider} from "@nextui-org/react";
+import {ThemeProvider as NextThemesProvider} from "next-themes";
 import { Enter } from "./Enter.jsx";
 import { Room } from "./room/Room.jsx";
 import { VarhubGameClient } from "../types";
@@ -16,13 +18,15 @@ export const App: FC = () => {
 	}, [client]);
 
 
-	if (!client) return (
-		<div>
-			<Enter onCreate={setClient}/>
-		</div>
-	);
-
 	return (
-		<Room client={client}  />
+		<NextUIProvider>
+			<NextThemesProvider attribute="class" defaultTheme="dark">
+				{client ? (
+					<Room client={client}  />
+				) : (
+					<Enter onCreate={setClient}/>
+				)}
+			</NextThemesProvider>
+		</NextUIProvider>
 	)
 }

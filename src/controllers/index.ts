@@ -8,14 +8,10 @@ export interface Quiz {
 	answers: Array<string>;
 }
 
-export type ScoreMap = {
-	[playerName: string]: number;
-}
-
 export type GameState = {
 	currentQuiz: Quiz|null;
 
-	scoreMap: ScoreMap;
+	scoreMap: Record<string, number>;
 	answeredPlayers: Array<string>;
 	correctAnswerIndex: number|null;
 	phase: GamePhase;
@@ -75,15 +71,16 @@ async function requestChatGPTQuiz(theme: string = "ягоды") {
 	return JSON.parse(response.body.result[0].result.replace(/(```|\n)/g,"").replace("json{","{"));
 }
 
-export async function requestNewQuestion () {
+export async function requestNewQuestion (theme?: string) {
 	if (state.phase !== "idle" && state.phase !== "results") return;
 
 	currentAnswers = {};
 	state.answeredPlayers = [];
 	state.correctAnswerIndex = null;
+	state.currentQuiz = null;
 	state.phase = "pending";
 	updateState();
-	const question = await requestChatGPTQuiz();
+	const question = await requestChatGPTQuiz(theme);
 
 	correctAnswerIndex = question.correctAnswerIndex;
 	delete question["correctAnswerIndex"];
